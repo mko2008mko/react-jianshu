@@ -4,15 +4,18 @@ import axios from "axios";
 const GET_HOME_DATA = "GET_HOME_DATA";
 const ADD_ARTICLE_LIST = "ADD_ARTICLE_LIST";
 const SCROLL_EVENT = "SCROLL_EVENT";
+const CHANGE_PAGE = "CHANGE_PAGE";
 
 
 const initState = fromJS({
     topicList: [],
     articleList: [],
     recommendList: [],
-    recommendWriter:[],
+    recommendWriter: [],
     page: 1,
-    isShow: false
+    isShow: false,
+    rwPage: 1,
+    rwTotalPage: 1
 
 })
 
@@ -23,7 +26,8 @@ export const homeReducer = (state = initState, action) => {
                 topicList: action.topicList,
                 articleList: action.articleList,
                 recommendList: action.recommendList,
-                recommendWriter:action.recommendWriter
+                recommendWriter: action.recommendWriter,
+                rwTotalPage: action.rwTotalPage
             })
         case ADD_ARTICLE_LIST:
             return state.merge({
@@ -33,6 +37,10 @@ export const homeReducer = (state = initState, action) => {
 
         case SCROLL_EVENT:
             return state.set('isShow', action.isShow);
+        case CHANGE_PAGE:
+            return state.set('rwPage',
+                state.get('rwPage') >= state.get('rwTotalPage') 
+                ? 1 : state.get('rwPage') + 1)
         default:
             return state;
     }
@@ -44,7 +52,8 @@ const getHomeDataSuccess = (result) => {
         topicList: fromJS(result.topicList),
         articleList: fromJS(result.articleList),
         recommendList: fromJS(result.recommendList),
-        recommendWriter:fromJS(result.recommendWriter)
+        recommendWriter: fromJS(result.recommendWriter),
+        rwTotalPage: Math.ceil(result.recommendWriter.length / 5)
     }
 }
 
@@ -83,5 +92,11 @@ export const backTopIsShow = (isshow) => {
     return {
         type: SCROLL_EVENT,
         isShow: isshow
+    }
+}
+
+export const changePage = () => {
+    return {
+        type: CHANGE_PAGE
     }
 }
